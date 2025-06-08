@@ -42,6 +42,18 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+4. Create a `.env` file in the project root
+
+Add the following keys:
+
+```env
+AZURE_ENDPOINT=
+AZURE_KEY=
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_KEY=
+API_BASE_URL=  # Optional, defaults to http://127.0.0.1:8000
+```
+
 ---
 
 ## Part 1 – Form Field Extraction from PDF (OCR)
