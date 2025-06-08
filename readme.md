@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/ed5b23ba-3e7e-46fd-a18c-8fcc520bee52" alt="kpmg-logo-1" width="200" />
-</p>
-
 <h1 align="center">GenAI Developer Assessment Assignment</h1>
 
 This project is a two-part solution for the KPMG GenAI Developer Assessment. It demonstrates integration with Azure Document Intelligence, GPT-4o, and embedding-based retrieval using ADA-002, covering both form-based field extraction and an AI-powered Q\&A chatbot system.
