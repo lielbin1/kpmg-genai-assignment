@@ -42,7 +42,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the project root
+### 4. Create a `.env` file in the project root
 
 Add the following keys:
 
