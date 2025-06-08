@@ -7,13 +7,17 @@ import numpy as np
 import json
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+
+# Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
+
+# Initialize FastAPI app
 app = FastAPI()
 
-# Logging
+# Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -27,13 +31,13 @@ with open("content/prompts/prompt_extract_data.txt", encoding="utf-8") as f:
 with open("content/prompts/prompt_qa.txt", encoding="utf-8") as f:
     QA_PROMPT_TEMPLATE = f.read()
 
-
+# Return language-specific version of the user info collection prompt
 def get_user_info_prompt(language: str) -> str:
     if language.lower() == "hebrew":
         return BASE_COLLECT_INFO_PROMPT + "\n\nענה תמיד בעברית בלבד לאורך כל השיחה."
     return BASE_COLLECT_INFO_PROMPT + "\n\nYou must always respond in English throughout the conversation."
 
-# Azure setup
+# Initialize Azure OpenAI client
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_KEY"),
     api_version="2024-02-01",
@@ -41,23 +45,32 @@ client = AzureOpenAI(
 )
 DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME")
 
+
+# Basic language detection based on Hebrew characters
 def detect_language(text: str) -> str:
     return "Hebrew" if any(c in text for c in "אבגדהוזחטיכלמנסעפצקרשת") else "English"
 
-# Request schema
+# Define the schema for incoming chat requests
 class ChatRequest(BaseModel):
     user_message: str
     history: list[tuple[str, str]]  # (user, bot)
     user_info: dict
     language: str
 
-def get_embedding(text):
-    response = client.embeddings.create(
-        model="text-embedding-ada-002",
-        input=[text]
-    )
-    return response.data[0].embedding
 
+# Get embedding using Azure OpenAI embedding model
+def get_embedding(text):
+    try:
+        response = client.embeddings.create(
+            model="text-embedding-ada-002",
+            input=[text]
+        )
+        return response.data[0].embedding
+    except Exception as e:
+        logger.error(f"Failed to get embedding: {e}")
+        raise
+
+# Load precomputed embeddings from disk
 def load_all_embeddings(folder):
     all_chunks = []
     if not os.path.exists(folder):
@@ -80,6 +93,7 @@ def load_all_embeddings(folder):
     
     return all_chunks
 
+# Find top-k most relevant chunks based on cosine similarity
 def find_top_k_matches(question, all_chunks, k=5):
     question_vec = np.array(get_embedding(question)).reshape(1, -1)
     
@@ -87,20 +101,26 @@ def find_top_k_matches(question, all_chunks, k=5):
     scores = []
 
     for chunk in all_chunks:
-        key = (chunk["text"], chunk["source"]) 
+        key = (chunk["text"], chunk["source"])
         if key in seen:
             continue
         seen.add(key)
 
-        doc_vec = np.array(chunk["embedding"]).reshape(1, -1)
-        score = cosine_similarity(question_vec, doc_vec)[0][0]
-        scores.append((score, chunk["text"], chunk["source"]))
+        try:
+            doc_vec = np.array(chunk["embedding"]).reshape(1, -1)
+            score = cosine_similarity(question_vec, doc_vec)[0][0]
+            scores.append((score, chunk["text"], chunk["source"]))
+        except Exception as e:
+            logger.warning(f"Error computing similarity for chunk {key}: {e}")
+            continue
 
     top = sorted(scores, key=lambda x: x[0], reverse=True)[:k]
     return top
 
+# Load all static embeddings once at server start
 ALL_EMBEDDINGS = load_all_embeddings("content/phase2_embedding")
 
+# Translate English text to Hebrew if needed
 def translate_to_hebrew(text: str) -> str:
     try:
         response = client.chat.completions.create(
@@ -115,23 +135,25 @@ def translate_to_hebrew(text: str) -> str:
         return translated
     except Exception as e:
         logger.warning(f"Translation failed: {e}")
-        return text  # fallback to original if translation fails
+        return text  
 
-
+# Main endpoint for handling chat requests
 @app.post("/ask")
 def ask(request: ChatRequest):
     logger.info(f"📥 Incoming user_info: {request.user_info}")
     try:
+        # Define fields to be extracted
         expected_fields = [
             "first_name", "last_name", "id_number", "gender",
             "age", "hmo", "card_number", "membership_tier"
         ]
 
+        # Detect conversation language
         message_language = detect_language(request.user_message)
         conversation_language = request.language or message_language
         logger.info(f"Detected/requested language: {conversation_language}")
 
-        # Confirmation logic
+        # Detect conversation language
         last_bot_reply = request.history[-1][1] if request.history else ""
         expected_confirmation_responses = [
             "מצוין, אני מזהה אותך עכשיו. אפשר להמשיך! מה תרצה לדעת?",
@@ -139,6 +161,7 @@ def ask(request: ChatRequest):
         ]
         is_confirmed = last_bot_reply.strip() in expected_confirmation_responses
 
+        # Extract user info from full chat history
         if is_confirmed and not request.user_info.get("confirmed"):
             logger.info("🟢 GPT confirmation detected. Extracting user data from chat history...")
 
@@ -174,7 +197,7 @@ def ask(request: ChatRequest):
             except Exception as e:
                 logger.warning(f"⚠️ Failed to parse extracted JSON: {e}")
 
-
+        # If user is confirmed, continue to answer questions using RAG
         if request.user_info.get("confirmed"):
             logger.info(f"💬 Confirmed: {request.user_info.get('confirmed')}, HMO: {request.user_info.get('hmo')}, Tier: {request.user_info.get('membership_tier')}")
             # Translate question to Hebrew for embedding matching
@@ -242,8 +265,7 @@ def ask(request: ChatRequest):
                 "language": conversation_language,
                 "user_info": request.user_info 
             }
-
-        # If not confirmed yet - continue regular collection
+        # If not yet confirmed, continue collecting missing fields
         all_filled = all(request.user_info.get(field) for field in expected_fields)
         user_prompt = get_user_info_prompt(conversation_language)
         messages = [{"role": "system", "content": user_prompt}]
@@ -264,7 +286,8 @@ def ask(request: ChatRequest):
             "language": conversation_language,
             "user_info": request.user_info
         }
-
+    
+    # Catch any unexpected error in the whole process
     except Exception as e:
         logger.error(f"Error: {e}")
         return {
