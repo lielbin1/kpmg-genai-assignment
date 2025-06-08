@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ed5b23ba-3e7e-46fd-a18c-8fcc520bee52" alt="kpmg-logo-1" width="200" />
+</p>
+
 <h1 align="center">GenAI Developer Assessment Assignment</h1>
 
 This project is a two-part solution for the KPMG GenAI Developer Assessment. It demonstrates integration with Azure Document Intelligence, GPT-4o, and embedding-based retrieval using ADA-002, covering both form-based field extraction and an AI-powered Q\&A chatbot system.
@@ -114,6 +118,43 @@ python Frontend.py
 ```
 
 Then, visit the Gradio URL to chat with the bot.
+
+
+
+## 🐳 Running the App with Docker
+
+Make sure Docker and Docker Compose are installed.
+
+### 1. Create a `.env` file in the root directory
+
+Use the same `.env` file for all services. See [Setup Instructions](#4-create-a-env-file-in-the-project-root) for the required keys.
+
+### 2. Build all services:
+
+```bash
+docker-compose build
+```
+
+### 3. Run all services:
+
+```bash
+docker-compose up
+```
+
+This will:
+
+* Launch the OCR app at [http://localhost:7860](http://localhost:7860)
+* Launch the chatbot backend at [http://localhost:8000](http://localhost:8000)
+* Launch the chatbot frontend at [http://localhost:8501](http://localhost:8501)
+
+To stop the containers:
+
+```bash
+docker-compose down
+```
+
+---
+
 
 
 ## ℹ️ Notes
