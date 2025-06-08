@@ -2,7 +2,17 @@ import gradio as gr
 import requests
 import os
 
-BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+# BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+# Use Docker hostname if running inside Docker
+docker_backend_host = "http://chatbot-backend:8000"
+default_host = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
+
+# Detect if running inside Docker
+if os.path.exists("/.dockerenv"):
+    BASE_URL = docker_backend_host
+else:
+    BASE_URL = default_host
+
 
 history = []
 user_info = {}

@@ -99,7 +99,7 @@ def find_top_k_matches(question, all_chunks, k=5):
     top = sorted(scores, key=lambda x: x[0], reverse=True)[:k]
     return top
 
-ALL_EMBEDDINGS = load_all_embeddings("phase2_embedding")
+ALL_EMBEDDINGS = load_all_embeddings("content/phase2_embedding")
 
 def translate_to_hebrew(text: str) -> str:
     try:
