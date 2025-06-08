@@ -93,29 +93,66 @@ def load_all_embeddings(folder):
     
     return all_chunks
 
-# Find top-k most relevant chunks based on cosine similarity
-def find_top_k_matches(question, all_chunks, k=5):
-    question_vec = np.array(get_embedding(question)).reshape(1, -1)
-    
+# Prepares the matrix of all document embeddings for fast similarity computation.
+def prepare_embedding_matrix(chunks):
+    texts, sources, vectors = [], [], []
     seen = set()
-    scores = []
 
-    for chunk in all_chunks:
+    for chunk in chunks:
         key = (chunk["text"], chunk["source"])
         if key in seen:
             continue
         seen.add(key)
 
         try:
-            doc_vec = np.array(chunk["embedding"]).reshape(1, -1)
-            score = cosine_similarity(question_vec, doc_vec)[0][0]
-            scores.append((score, chunk["text"], chunk["source"]))
-        except Exception as e:
-            logger.warning(f"Error computing similarity for chunk {key}: {e}")
+            vectors.append(chunk["embedding"])
+            texts.append(chunk["text"])
+            sources.append(chunk["source"])
+        except:
             continue
 
-    top = sorted(scores, key=lambda x: x[0], reverse=True)[:k]
-    return top
+    return np.array(vectors), texts, sources
+
+
+# Find top-k most relevant chunks based on cosine similarity
+def find_top_k_matches(question, all_chunks, k=5):
+    question_vec = np.array(get_embedding(question)).reshape(1, -1)
+    
+    doc_matrix, texts, sources = prepare_embedding_matrix(all_chunks)
+
+    try:
+        similarities = cosine_similarity(question_vec, doc_matrix)[0]
+    except Exception as e:
+        logger.error(f"Cosine similarity failed: {e}")
+        return []
+
+    top_indices = np.argsort(similarities)[::-1][:k]
+    top_results = [(similarities[i], texts[i], sources[i]) for i in top_indices]
+    
+    return top_results
+
+# def find_top_k_matches(question, all_chunks, k=5):
+#     question_vec = np.array(get_embedding(question)).reshape(1, -1)
+    
+#     seen = set()
+#     scores = []
+
+#     for chunk in all_chunks:
+#         key = (chunk["text"], chunk["source"])
+#         if key in seen:
+#             continue
+#         seen.add(key)
+
+#         try:
+#             doc_vec = np.array(chunk["embedding"]).reshape(1, -1)
+#             score = cosine_similarity(question_vec, doc_vec)[0][0]
+#             scores.append((score, chunk["text"], chunk["source"]))
+#         except Exception as e:
+#             logger.warning(f"Error computing similarity for chunk {key}: {e}")
+#             continue
+
+#     top = sorted(scores, key=lambda x: x[0], reverse=True)[:k]
+#     return top
 
 # Load all static embeddings once at server start
 ALL_EMBEDDINGS = load_all_embeddings("content/phase2_embedding")
