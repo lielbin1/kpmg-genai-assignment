@@ -1,0 +1,109 @@
+You are given raw text extracted from a scanned form submitted to a health institution.
+
+Your task is to extract all relevant fields and return a structured JSON.  
+Make sure to include all fields, even if they are empty. The format must match exactly the schema provided below.  
+If a field is missing in the text, leave its value as an empty string.
+
+Constraints:
+- Every date always appears as exactly 8 digits, in the format DDMMYYYY.
+- Every ID number (National ID) always consists of exactly 9 digits.
+
+Below is an example of an extracted text and the expected JSON output.
+
+=== Input Text ===
+Page 1 of 2
+Form Filling Date
+2 50|1 20 23
+Form Received at Clinic
+0 2 0 2|19 9|9
+National Insurance Institute
+Claim for Medical Assistance – Self-Employed
+Please read the instructions on page 2 before filling this form
+Date of Injury
+1|6|0 4|2 022
+ID Number
+8|775|2|4|563
+First Name
+John
+Last Name
+Doe
+Date of Birth
+0|2021|9|9|5
+Gender
+Male
+Address
+Hertzl Street 16, Apt. 12, Entrance A, Tel Aviv, 312422
+Mobile Phone
+0501234567
+Occupation
+Delivery
+Time of Injury
+19:00
+Location of Injury
+Warehouse
+Injury Address
+8 Roses Street, Tel Aviv
+Accident Description
+I slipped on a wet floor. There was no warning sign.
+Injured Body Part
+Left leg
+Signature
+John Doe
+Health Fund
+Clalit
+
+=== Output JSON ===
+{
+  "lastName": "Doe",
+  "firstName": "John",
+  "idNumber": "877524563",
+  "gender": "Male",
+  "dateOfBirth": {
+    "day": "02",
+    "month": "02",
+    "year": "1995"
+  },
+  "address": {
+    "street": "Hertzl Street",
+    "houseNumber": "16",
+    "entrance": "A",
+    "apartment": "12",
+    "city": "Tel Aviv",
+    "postalCode": "312422",
+    "poBox": ""
+  },
+  "landlinePhone": "",
+  "mobilePhone": "0501234567",
+  "jobType": "Delivery",
+  "dateOfInjury": {
+    "day": "16",
+    "month": "04",
+    "year": "2022"
+  },
+  "timeOfInjury": "19:00",
+  "accidentLocation": "Warehouse",
+  "accidentAddress": "8 Roses Street, Tel Aviv",
+  "accidentDescription": "I slipped on a wet floor. There was no warning sign.",
+  "injuredBodyPart": "Left leg",
+  "signature": "John Doe",
+  "formFillingDate": {
+    "day": "25",
+    "month": "01",
+    "year": "2023"
+  },
+  "formReceiptDateAtClinic": {
+    "day": "02",
+    "month": "02",
+    "year": "1999"
+  },
+  "medicalInstitutionFields": {
+    "healthFundMember": "Clalit",
+    "natureOfAccident": "",
+    "medicalDiagnoses": ""
+  }
+}
+
+Now, given the following text, extract the required information and return a JSON in the exact same format:
+"""
+[INSERT_TEXT_HERE]
+"""

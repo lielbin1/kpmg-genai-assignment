@@ -1,0 +1,115 @@
+You will receive a JSON object where the keys (field names) are written in a different language (e.g., Hebrew).
+Your task is to map the field names to English keys, following the structure shown in the example below.
+
+Do not change the values. Keep them in their original language.
+
+If a field is missing in the input, return it with an empty value ("").
+
+The output must be a valid JSON object with English keys and the same values.
+
+Return only the JSON object, without any additional text or formatting.
+
+Example:
+
+Input JSON:
+{
+  "שם משפחה": "טננהוים",
+  "שם פרטי": "יהודה",
+  "מספר זהות": "877524563",
+  "מין": "זכר",
+  "תאריך לידה": {
+    "יום": "02",
+    "חודש": "02",
+    "שנה": "1995"
+  },
+  "כתובת": {
+    "רחוב": "הרמבם",
+    "מספר בית": "16",
+    "כניסה": "1",
+    "דירה": "12",
+    "ישוב": "אבן יהודה",
+    "מיקוד": "312422",
+    "תא דואר": ""
+  },
+  "טלפון קווי": "",
+  "טלפון נייד": "0502474947",
+  "סוג העבודה": "מלצרות",
+  "תאריך הפגיעה": {
+    "יום": "16",
+    "חודש": "04",
+    "שנה": "2022"
+  },
+  "שעת הפגיעה": "19:00",
+  "מקום התאונה": "במפעל",
+  "כתובת מקום התאונה": "הורדים 8, תל אביב",
+  "תיאור התאונה": "החלקתי בגלל שהרצפה הייתה רטובה ולא היה שום שלט שמזהיר.",
+  "האיבר שנפגע": "יד שמאל",
+  "חתימה": "טננהוים יהודה",
+  "תאריך מילוי הטופס": {
+    "יום": "25",
+    "חודש": "01",
+    "שנה": "2023"
+  },
+  "תאריך קבלת הטופס בקופה": {
+    "יום": "02",
+    "חודש": "02",
+    "שנה": "1999"
+  },
+  "למילוי ע\"י המוסד הרפואי": {
+    "חבר בקופת חולים": "מאוחדת",
+    "מהות התאונה": "",
+    "אבחנות רפואיות": ""
+  }
+}
+
+Output JSON:
+{
+  "lastName": "טננהוים",
+  "firstName": "יהודה",
+  "idNumber": "877524563",
+  "gender": "זכר",
+  "dateOfBirth": {
+    "day": "02",
+    "month": "02",
+    "year": "1995"
+  },
+  "address": {
+    "street": "הרמבם",
+    "houseNumber": "16",
+    "entrance": "1",
+    "apartment": "12",
+    "city": "אבן יהודה",
+    "postalCode": "312422",
+    "poBox": ""
+  },
+  "landlinePhone": "",
+  "mobilePhone": "0502474947",
+  "jobType": "מלצרות",
+  "dateOfInjury": {
+    "day": "16",
+    "month": "04",
+    "year": "2022"
+  },
+  "timeOfInjury": "19:00",
+  "accidentLocation": "במפעל",
+  "accidentAddress": "הורדים 8, תל אביב",
+  "accidentDescription": "החלקתי בגלל שהרצפה הייתה רטובה ולא היה שום שלט שמזהיר.",
+  "injuredBodyPart": "יד שמאל",
+  "signature": "טננהוים יהודה",
+  "formFillingDate": {
+    "day": "25",
+    "month": "01",
+    "year": "2023"
+  },
+  "formReceiptDateAtClinic": {
+    "day": "02",
+    "month": "02",
+    "year": "1999"
+  },
+  "medicalInstitutionFields": {
+    "healthFundMember": "מאוחדת",
+    "natureOfAccident": "",
+    "medicalDiagnoses": ""
+  }
+}
+

@@ -1,0 +1,17 @@
+# Virtual environments
+.venv/
+venv/
+
+# Logs
+logs/
+*.log
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Environment config
+.env
+
+# VSCode settings
+.vscode/
