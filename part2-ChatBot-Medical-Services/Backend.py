@@ -18,13 +18,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # Load base prompts
-with open("prompt_user_data.txt", encoding="utf-8") as f:
+with open("content/prompts/prompt_user_data.txt", encoding="utf-8") as f:
     BASE_COLLECT_INFO_PROMPT = f.read()
 
-with open("prompt_extract_data.txt", encoding="utf-8") as f:
+with open("content/prompts/prompt_extract_data.txt", encoding="utf-8") as f:
     EXTRACT_DATA_PROMPT = f.read()
 
-with open("prompt_qa.txt", encoding="utf-8") as f:
+with open("content/prompts/prompt_qa.txt", encoding="utf-8") as f:
     QA_PROMPT_TEMPLATE = f.read()
 
 
@@ -120,6 +120,7 @@ def translate_to_hebrew(text: str) -> str:
 
 @app.post("/ask")
 def ask(request: ChatRequest):
+    logger.info(f"📥 Incoming user_info: {request.user_info}")
     try:
         expected_fields = [
             "first_name", "last_name", "id_number", "gender",
@@ -175,14 +176,9 @@ def ask(request: ChatRequest):
 
 
         if request.user_info.get("confirmed"):
-            logger.info("💬 Detected a follow-up question after confirmation. Running RAG.")
-
-            logger.info("🔍 User info for prompt:")
-            for k, v in request.user_info.items():
-                logger.info(f"  {k}: {v}")
-
+            logger.info(f"💬 Confirmed: {request.user_info.get('confirmed')}, HMO: {request.user_info.get('hmo')}, Tier: {request.user_info.get('membership_tier')}")
             # Translate question to Hebrew for embedding matching
-            if conversation_language.lower() != "hebrew":
+            if message_language.lower() != "hebrew":
                 translated_query = translate_to_hebrew(request.user_message)
                 translated_hmo = translate_to_hebrew(request.user_info.get("hmo", ""))
                 translated_tier = translate_to_hebrew(request.user_info.get("membership_tier", ""))
@@ -210,15 +206,24 @@ def ask(request: ChatRequest):
                 **request.user_info,
                 conversation_language=conversation_language
             )
+            chat_history = "\n".join(
+                f"User: {u}\nAssistant: {b}" for u, b in request.history[-4:]
+            )
+
             full_prompt = f"""{rag_prompt}
-            ---
+            User Profile:
+            {json.dumps(request.user_info, ensure_ascii=False, indent=2)}
+
+            Recent Conversation:
+            {chat_history}
+
             Context:
             {context_texts}
-            ---
 
             Question:
             {request.user_message}
             """
+
             
             rag_response = client.chat.completions.create(
                 model=DEPLOYMENT_NAME,
@@ -230,19 +235,12 @@ def ask(request: ChatRequest):
             )
 
             answer = rag_response.choices[0].message.content
-            # with open("logs/rag_answer.log", "a", encoding="utf-8") as log_file:
-            #     log_file.write(f"\n=== RAG Answer ===\n")
-            #     log_file.write(f"Question: {request.user_message}\n")
-            #     log_file.write(f"Answer: {answer}\n")
-            #     log_file.write(f"Source file: {source}\n")
-            #     log_file.write(f"Matched text: {matched_text}\n")
-            #     log_file.write(f"Score: {score:.4f}\n")
-            #     log_file.write(f"==================\n")
 
             return {
                 "response": answer,
                 "all_user_info_collected": True,
                 "language": conversation_language,
+                "user_info": request.user_info 
             }
 
         # If not confirmed yet - continue regular collection
@@ -264,6 +262,7 @@ def ask(request: ChatRequest):
             "response": reply,
             "all_user_info_collected": all_filled,
             "language": conversation_language,
+            "user_info": request.user_info
         }
 
     except Exception as e:
@@ -272,4 +271,5 @@ def ask(request: ChatRequest):
             "response": f"שגיאה: {str(e)}",
             "all_user_info_collected": False,
             "language": request.language or "unknown",
+            "user_info": request.user_info
         }

@@ -2,7 +2,7 @@ import gradio as gr
 import requests
 import os
 
-BASE_URL = os.getenv("API_BASE_URL")
+BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 history = []
 user_info = {}
@@ -26,23 +26,85 @@ def chat_with_bot(message):
     if current_language is None and "language" in data:
         current_language = data["language"]
 
+    if "user_info" in data:
+        user_info = data["user_info"]
+
     history.append((message, bot_reply))
     return history, ""
 
-with gr.Blocks(css=".gr-chatbot {font-size: 16px;}") as demo:
-    gr.Markdown("## 🩺 Chatbot for Israeli Healthcare Services")
+custom_css = """
+.gr-block.gr-box {
+    background-color: #f7f7f7;
+    border-radius: 12px;
+    padding: 20px;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Segoe UI', sans-serif;
+}
+.gr-chatbot {
+    font-size: 16px;
+    border-radius: 10px;
+    direction: rtl;
+    text-align: right;
+}
+.gr-textbox textarea {
+    direction: rtl;
+    text-align: right;
+}
+.gr-button {
+    direction: rtl;
+    text-align: center;
+}
+.big-header {
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #333;
+    text-align: center; /* שינוי: כותרת למרכז */
+}
+.welcome-text {
+    font-size: 18px;
+    color: #555;
+    text-align: right;
+}
+#footer-logo {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+#health-logos {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 10px;
+}
+"""
 
-    chatbot = gr.Chatbot(height=550, label="Healthcare Assistant")
+with gr.Blocks(css=custom_css, title="עוזר רפואי חכם") as demo:
+    with gr.Column():
+        with gr.Row(elem_id="health-logos"):
+            gr.Image("content/Images/macabi.jpg", show_label=False, show_download_button=False, height=60)
+            gr.Image("content/Images/clalit.png", show_label=False, show_download_button=False, height=60)
+            gr.Image("content/Images/meuhedet.png", show_label=False, show_download_button=False, height=60)
+
+        gr.HTML('<div class="big-header">🤖 עוזר רפואי חכם</div>')
+        gr.HTML('<div class="welcome-text">ברוכים הבאים! כאן תוכלו לשאול שאלות ולקבל מידע על שירותי בריאות מקופות החולים בישראל.</div>')
+
+    chatbot = gr.Chatbot(height=500, label="עוזר הבריאות")
 
     with gr.Row():
         msg = gr.Textbox(
             show_label=False,
-            placeholder="Type your message here and press Enter or click Send...",
+            placeholder="הקלידו את ההודעה כאן ולחצו Enter או על כפתור שלח...",
             scale=9
         )
-        send = gr.Button("Send", scale=1)
+        send = gr.Button("שלח", scale=1)
 
     send.click(fn=chat_with_bot, inputs=msg, outputs=[chatbot, msg])
     msg.submit(fn=chat_with_bot, inputs=msg, outputs=[chatbot, msg])
 
-demo.launch()
+    with gr.Row(elem_id="footer-logo"):
+        gr.Image("content/Images/kpmg-logo.png", show_label=False, show_download_button=False, height=40)
+
+demo.launch(share=True)

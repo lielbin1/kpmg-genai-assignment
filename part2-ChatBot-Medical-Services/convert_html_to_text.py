@@ -51,8 +51,8 @@ def convert_html_to_text(html_path):
     return "\n".join(output_lines)
 
 
-input_dir = "phase2_data"
-output_dir = "phase2_data_txt"
+input_dir = "content/phase2_data"
+output_dir = "content/phase2_data_txt"
 os.makedirs(output_dir, exist_ok=True)
 
 for filename in os.listdir(input_dir):

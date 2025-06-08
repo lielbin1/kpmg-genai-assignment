@@ -24,7 +24,7 @@ def extract_text_from_document(file_path: str):
 
 
 def load_prompt(language: str, full_text: str):
-    file_name = "part1-OCR/prompt_he.txt" if language == "he" else "part1-OCR/prompt_en.txt"
+    file_name = "prompts/prompt_he.txt" if language == "he" else "prompts/prompt_en.txt"
     with open(file_name, encoding="utf-8") as f:
         return f.read() + f'\n\n"""\n{full_text}\n"""'
 
@@ -39,23 +39,12 @@ def call_gpt(prompt: str):
     )
     return response.choices[0].message.content
 
-# def run_extraction_pipeline(file):  
-    # full_text, language = extract_text_from_document(file)
-    # extraction_prompt = load_prompt(language, full_text)
-    # extracted_json = call_gpt(extraction_prompt)
-
-    # with open("part1-OCR/translate_json_fields_prompt.txt", encoding="utf-8") as f:
-    #     translate_prompt = f.read() + f"\n\n" + extracted_json
-
-    # return_json = call_gpt(translate_prompt)
-    # return return_json
-
 
 def run_extraction_pipeline(file_path: str):
     full_text, language = extract_text_from_document(file_path)
 
     # Load the correct base prompt
-    file_name = "part1-OCR/prompt_he.txt" if language == "he" else "part1-OCR/prompt_en.txt"
+    file_name = "prompts/prompt_he.txt" if language == "he" else "prompts/prompt_en.txt"
     with open(file_name, encoding="utf-8") as f:
         base_prompt = f.read()
     
@@ -63,7 +52,7 @@ def run_extraction_pipeline(file_path: str):
     extracted_json = call_gpt(extraction_prompt)
 
     # Load translation prompt
-    with open("part1-OCR/translate_json_fields_prompt.txt", encoding="utf-8") as f:
+    with open("prompts/translate_json_fields_prompt.txt", encoding="utf-8") as f:
         translate_prompt = f.read()
     
     translate_full_prompt = translate_prompt + f"\n\n{extracted_json}"
@@ -75,10 +64,3 @@ def run_extraction_pipeline(file_path: str):
         return_json = return_json.removeprefix("```").removesuffix("```").strip()
 
     return return_json
-
-
-
-
-# if __name__ == "__main__":
-#     FILE_PATH = "phase1_data/283_ex3.pdf"
-#     run_extraction_pipeline(FILE_PATH)
