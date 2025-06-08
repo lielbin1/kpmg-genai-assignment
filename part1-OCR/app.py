@@ -1,4 +1,3 @@
-# main.py - Fixed Gradio App
 import gradio as gr
 from gradio_pdf import PDF
 import json
