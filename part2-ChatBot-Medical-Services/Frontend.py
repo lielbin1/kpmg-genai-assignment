@@ -107,4 +107,10 @@ with gr.Blocks(css=custom_css, title="עוזר רפואי חכם") as demo:
     with gr.Row(elem_id="footer-logo"):
         gr.Image("content/Images/kpmg-logo.png", show_label=False, show_download_button=False, height=40)
 
-demo.launch(share=True)
+# demo.launch()
+
+if __name__ == "__main__":
+    demo.launch(
+        server_name=os.getenv("GRADIO_SERVER", "127.0.0.1"),
+        server_port=int(os.getenv("GRADIO_PORT", 8501))
+    )

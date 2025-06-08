@@ -4,130 +4,216 @@
 
 <h1 align="center">GenAI Developer Assessment Assignment</h1>
 
-This project is a two-part solution for the KPMG GenAI Developer Assessment. It demonstrates integration with Azure Document Intelligence, GPT-4o, and embedding-based retrieval using ADA-002, covering both form-based field extraction and an AI-powered Q\&A chatbot system.
 
----
+You are given 4 days to complete this assessment. For this assignment, you have access to the following Azure OpenAI resources:
 
-## 🛠️ Setup Instructions
+- Document Intelligence for Optical Character Recognition (OCR)
+- GPT-4o and GPT-4o Mini as Large Language Models (LLMs)
+- ADA 002 for text embeddings
 
-### 1. Create a Virtual Environment
+All required resources have already been deployed in Azure. There is no need to create additional resources for this assignment.
 
-```bash
-python -m venv .venv
-```
+The necessary Azure credentials have been included in the email containing this assignment. Please refer to these credentials for accessing the pre-deployed resources.
 
-### 2. Activate the Environment
+## Repository Contents
 
-* **Windows (PowerShell):**
+The Git repository for this assignment contains two important folders:
 
-  ```bash
-  .venv\Scripts\Activate.ps1
-  ```
+- **phase1_data**: This folder contains:
+  - 1 raw PDF file that you can use to create more examples if needed
+  - 3 filled documents for testing and development
 
-* **Windows (Git Bash):**
+- **phase2_data**: This folder contains:
+  - HTML files that serve as the knowledge base for Part 2 of the home assignment
 
-  ```bash
-  source .venv/Scripts/activate
-  ```
+## Part 1: Field Extraction using Document Intelligence & Azure OpenAI
 
-* **macOS/Linux:**
+### Task
+Develop a system that extracts information from ביטוח לאומי (National Insurance Institute) forms using OCR and Azure OpenAI.
 
-  ```bash
-  source .venv/bin/activate
-  ```
+### Requirements
+1. Use Azure Document Intelligence for OCR. [Learn more about Document Intelligence layout](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-layout?view=doc-intel-4.0.0&tabs=sample-code)
+2. Use Azure OpenAI to extract fields and generate JSON output.
+3. Create a simple UI to upload a PDF/JPG file and display the resulting JSON. You can use **Streamlit** or **Gradio** for the UI implementation.
+4. Handle forms filled in either Hebrew or English.
+5. For any fields not present or not extractable, use an empty string in the JSON output.
+6. Implement a method to validate the accuracy and completeness of the extracted data.
 
-### 3. Install Dependencies
+### Desired Output Format:
+json
+{
+  "lastName": "",
+  "firstName": "",
+  "idNumber": "",
+  "gender": "",
+  "dateOfBirth": {
+    "day": "",
+    "month": "",
+    "year": ""
+  },
+  "address": {
+    "street": "",
+    "houseNumber": "",
+    "entrance": "",
+    "apartment": "",
+    "city": "",
+    "postalCode": "",
+    "poBox": ""
+  },
+  "landlinePhone": "",
+  "mobilePhone": "",
+  "jobType": "",
+  "dateOfInjury": {
+    "day": "",
+    "month": "",
+    "year": ""
+  },
+  "timeOfInjury": "",
+  "accidentLocation": "",
+  "accidentAddress": "",
+  "accidentDescription": "",
+  "injuredBodyPart": "",
+  "signature": "",
+  "formFillingDate": {
+    "day": "",
+    "month": "",
+    "year": ""
+  },
+  "formReceiptDateAtClinic": {
+    "day": "",
+    "month": "",
+    "year": ""
+  },
+  "medicalInstitutionFields": {
+    "healthFundMember": "",
+    "natureOfAccident": "",
+    "medicalDiagnoses": ""
+  }
+}
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Create a `.env` file in the project root
-
-Add the following keys:
-
-```env
-AZURE_ENDPOINT=
-AZURE_KEY=
-AZURE_OPENAI_ENDPOINT=
-AZURE_OPENAI_KEY=
-API_BASE_URL=  # Optional, defaults to http://127.0.0.1:8000
-```
-
----
-
-## Part 1 – Form Field Extraction from PDF (OCR)
-
-### Goal:
-
-Extract structured information from ביטוח לאומי (National Insurance Institute) forms. The user uploads a PDF file, and the system uses:
-
-* Azure Document Intelligence for OCR
-* Azure OpenAI (GPT-4o) to extract fields and return a structured JSON
-
-### To Run:
-
-```bash
-cd part1-OCR
-python app.py
-```
-
-Then open the displayed URL in your browser, upload a filled-out PDF form, and view the extracted JSON output.
-
----
-
-## Part 2 – Stateless Medical Chatbot (Q\&A)
-
-### Goal:
-
-Build a microservice-based chatbot that:
-
-* Collects user details (via GPT prompt, not a form)
-* Answers user questions about medical services (Clalit, Maccabi, Meuhedet)
-* Uses RAG (retrieval-augmented generation) with ADA embeddings
-* Supports both English and Hebrew
-* Operates statelessly (no server-side memory)
-
-The knowledge base is built from HTML documents in `content/phase2_data/`.
-
-### Technologies:
-
-* FastAPI backend
-* Gradio frontend
-* Azure OpenAI GPT-4o
-* ADA 002 embeddings + cosine similarity for RAG
-* Stateless architecture (all context sent with each request)
-* Structured logging
-
-### To Run:
-
-> Open two terminals (or terminal tabs):
-
-**Terminal 1: Start the backend server**
-
-```bash
-cd part2-ChatBot-Medical-Services
-python -m uvicorn Backend:app --reload
-```
-
-**Terminal 2: Start the Gradio frontend**
-
-```bash
-cd part2-ChatBot-Medical-Services
-python Frontend.py
-```
-
-Then, visit the Gradio URL to chat with the bot.
+Here is a translation of the fields in Hebrew: 
+json
+{
+  "שם משפחה": "",
+  "שם פרטי": "",
+  "מספר זהות": "",
+  "מין": "",
+  "תאריך לידה": {
+    "יום": "",
+    "חודש": "",
+    "שנה": ""
+  },
+  "כתובת": {
+    "רחוב": "",
+    "מספר בית": "",
+    "כניסה": "",
+    "דירה": "",
+    "ישוב": "",
+    "מיקוד": "",
+    "תא דואר": ""
+  },
+  "טלפון קווי": "",
+  "טלפון נייד": "",
+  "סוג העבודה": "",
+  "תאריך הפגיעה": {
+    "יום": "",
+    "חודש": "",
+    "שנה": ""
+  },
+  "שעת הפגיעה": "",
+  "מקום התאונה": "",
+  "כתובת מקום התאונה": "",
+  "תיאור התאונה": "",
+  "האיבר שנפגע": "",
+  "חתימה": "",
+  "תאריך מילוי הטופס": {
+    "יום": "",
+    "חודש": "",
+    "שנה": ""
+  },
+  "תאריך קבלת הטופס בקופה": {
+    "יום": "",
+    "חודש": "",
+    "שנה": ""
+  },
+  "למילוי ע\"י המוסד הרפואי": {
+    "חבר בקופת חולים": "",
+    "מהות התאונה": "",
+    "אבחנות רפואיות": ""
+  }
+}
 
 
-## ℹ️ Notes
+## Part 2: Microservice-based ChatBot Q&A on Medical Services
 
-* The chatbot handles multiple users by passing context from the frontend.
-* The PDF extractor works with both Hebrew and English forms.
-* Prompts are stored in `prompts/prompt_*.txt` files and injected dynamically.
 
----
+### Task
+Develop a microservice-based chatbot system that answers questions about medical services for Israeli health funds (Maccabi, Meuhedet, and Clalit) based on user-specific information. The system should be capable of handling multiple users simultaneously without maintaining server-side user memory.
 
-## 💡 Author
+### Core Requirements
 
-Liel Binyamin – Submitted for the 2025 GenAI Developer Assessment at KPMG
+1. **Microservice Architecture**
+   - Implement the chatbot as a stateless microservice using FastAPI or Flask.
+   - Handle multiple concurrent users efficiently.
+   - Manage all user session data and conversation history client-side (frontend).
+
+2. **User Interface**
+   - Develop a frontend using **Gradio** or **Streamlit**.
+   - Implement two main phases: User Information Collection and Q&A.
+
+3. **Azure OpenAI Integration**
+   - Utilize the Azure OpenAI client library for Python.
+   - Implement separate prompts for the information collection and Q&A phases.
+
+4. **Data Handling**
+   - Use provided HTML files provided in the 'phase2_data' folder as the knowledge base for answering questions.
+
+5. **Multi-language Support**
+   - Implement support for Hebrew and English. 
+
+6. **Error Handling and Logging**
+   - Implement comprehensive error handling and validation.
+   - Create a logging system to track chatbot activities, errors, and interactions.
+
+### Detailed Specifications
+
+#### User Information Collection Phase
+Collect the following user information:
+- First and last name
+- ID number (valid 9-digit number)
+- Gender
+- Age (between 0 and 120)
+- HMO name (מכבי | מאוחדת | כללית)
+- HMO card number (9-digit)
+- Insurance membership tier (זהב | כסף | ארד)
+- Provide a confirmation step for users to review and correct their information.
+
+**Note:** This process should be managed exclusively through the LLM, avoiding any hardcoded question-answer logic or form-based filling in the UI
+
+
+#### Q&A Phase
+- Transition to answering questions based on the user's HMO and membership tier.
+- Utilize the knowledge base from provided HTML files.
+
+#### State Management
+- Pass all necessary user information and conversation history with each request to maintain statelessness.
+
+### Evaluation Criteria
+
+1. Microservice Architecture Implementation
+2. Technical Proficiency (Azure OpenAI usage, data processing)
+3. Prompt Engineering and LLM Utilization
+4. Code Quality and Organization
+5. User Experience
+6. Performance and Scalability
+7. Documentation
+8. Innovation
+9. Logging and Monitoring Implementation
+
+### Submission Guidelines
+1. Provide source code via GitHub.
+2. Include setup and run instructions.
+
+**Good luck! For any questions, feel free to contact me.**
+
+Dor Getter.

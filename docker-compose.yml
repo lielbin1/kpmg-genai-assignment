@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  ocr-app:
+    build:
+      context: ./part1-OCR
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    environment:
+      - GRADIO_SERVER=0.0.0.0
+      - GRADIO_PORT=7860
+    command: python app.py
+
+  chatbot-backend:
+    build:
+      context: ./part2-ChatBot-Medical-Services
+    command: python -m uvicorn Backend:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+
+  chatbot-frontend:
+    build:
+      context: ./part2-ChatBot-Medical-Services
+    command: python Frontend.py
+    ports:
+      - "8501:8501"
+    depends_on:
+      - chatbot-backend
+    env_file:
+      - .env
+    environment:
+      - GRADIO_SERVER=0.0.0.0
+      - GRADIO_PORT=8501

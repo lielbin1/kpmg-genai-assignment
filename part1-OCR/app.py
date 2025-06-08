@@ -38,5 +38,11 @@ with gr.Blocks(title="PDF Field Extraction") as demo:
     btn.click(fn=process_pdf, inputs=pdf, outputs=output)
 
 
+# if __name__ == "__main__":
+#     demo.launch()
+
 if __name__ == "__main__":
-    demo.launch(share=True, debug=True)
+    demo.launch(
+        server_name=os.getenv("GRADIO_SERVER", "127.0.0.1"),
+        server_port=int(os.getenv("GRADIO_PORT", 7860))
+    )
