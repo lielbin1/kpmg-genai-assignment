@@ -1,6 +1,5 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/ed5b23ba-3e7e-46fd-a18c-8fcc520bee52" alt="kpmg-logo-1" width="200" />
-</p>
+![image](https://github.com/user-attachments/assets/ddbe956e-11c5-4a19-8432-845ef5f1a778)
+
 
 <h1 align="center">GenAI Developer Assessment Assignment</h1>
 
